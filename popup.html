@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Stock Options Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Load Plotly from local file -->
+    <script src="plotly.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Stock Options Calculator</h2>
+        
+        <div class="calculator-grid">
+            <!-- Left Column - Main Inputs -->
+            <div class="input-section">
+                <h3>Basic Parameters</h3>
+                <div class="input-group">
+                    <label for="strategy">Strategy:</label>
+                    <select id="strategy">
+                        <optgroup label="Single Options">
+                            <option value="Long Call">Long Call</option>
+                            <option value="Long Put">Long Put</option>
+                            <option value="Short Call">Short Call</option>
+                            <option value="Short Put">Short Put</option>
+                        </optgroup>
+                        <optgroup label="Spreads">
+                            <option value="Bull Call Spread">Bull Call Spread</option>
+                            <option value="Bear Put Spread">Bear Put Spread</option>
+                            <option value="Iron Condor">Iron Condor</option>
+                            <option value="Long Straddle">Long Straddle</option>
+                            <option value="Long Strangle">Long Strangle</option>
+                            <option value="Long Butterfly Spread">Long Butterfly Spread</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="stock">Stock Price ($):</label>
+                    <input type="number" id="stock" step="0.01" value="0">
+                </div>
+
+                <div class="input-group">
+                    <label for="strike">Put Strike ($):</label>
+                    <input type="number" id="strike" step="0.01" value="0">
+                </div>
+
+                <div class="input-group spread-field" style="display: none;">
+                    <label for="strike2">Second Strike ($):</label>
+                    <input type="number" id="strike2" step="0.01" value="0">
+                </div>
+
+                <div class="input-group iron-condor-field" style="display: none;">
+                    <label for="strike3">Third Strike ($):</label>
+                    <input type="number" id="strike3" step="0.01" value="0">
+                </div>
+
+                <div class="input-group iron-condor-field" style="display: none;">
+                    <label for="strike4">Fourth Strike ($):</label>
+                    <input type="number" id="strike4" step="0.01" value="0">
+                </div>
+
+                <div class="input-group">
+                    <label for="premium">Put Premium ($):</label>
+                    <input type="number" id="premium" step="0.01" value="0" title="Enter as a positive number; code handles debits/credits.">
+                </div>
+
+                <div class="input-group spread-field" style="display: none;">
+                    <label for="premium2">Second Premium ($):</label>
+                    <input type="number" id="premium2" step="0.01" value="0">
+                </div>
+
+                <div class="input-group iron-condor-field" style="display: none;">
+                    <label for="premium3">Third Premium ($):</label>
+                    <input type="number" id="premium3" step="0.01" value="0">
+                </div>
+
+                <div class="input-group iron-condor-field" style="display: none;">
+                    <label for="premium4">Fourth Premium ($):</label>
+                    <input type="number" id="premium4" step="0.01" value="0">
+                </div>
+
+                <div class="input-group">
+                    <label for="quantity">Contracts:</label>
+                    <input type="number" id="quantity" min="1" value="1">
+                </div>
+
+                <div class="input-group strangle-field" style="display: none;">
+                    <label for="strike_strangle">Call Strike ($):</label>
+                    <input type="number" id="strike_strangle" step="0.01" value="0">
+                </div>
+
+                <div class="input-group butterfly-field" style="display: none;">
+                    <label for="strike_butterfly">Third Strike ($):</label>
+                    <input type="number" id="strike_butterfly" step="0.01" value="0">
+                </div>
+
+                <div class="input-group butterfly-field" style="display: none;">
+                    <label for="premium2">Mid Premium ($):</label>
+                    <input type="number" id="premium2" step="0.01" value="0">
+                </div>
+                <div class="input-group butterfly-field" style="display: none;">
+                    <label for="premium3">High Premium ($):</label>
+                    <input type="number" id="premium3" step="0.01" value="0">
+                </div>
+
+                <div class="input-group straddle-field" style="display: none;">
+                    <label for="premium_straddle">Call Premium ($):</label>
+                    <input type="number" id="premium_straddle" step="0.01" value="0" title="Enter as a positive number; code handles debits/credits.">
+                </div>
+            </div>
+
+            <!-- Right Column - Market Parameters -->
+            <div class="input-section">
+                <h3>Market Parameters</h3>
+                <div class="input-group">
+                    <label for="expiry">Expiry Date:</label>
+                    <input type="date" id="expiry">
+                </div>
+
+                <div class="input-group">
+                    <label for="volatility">Volatility (%):</label>
+                    <input type="number" id="volatility" step="0.01" value="30">
+                </div>
+
+                <div class="input-group">
+                    <label for="riskFree">Risk-free Rate (%):</label>
+                    <input type="number" id="riskFree" step="0.01" value="5.25">
+                </div>
+
+                <div class="input-group">
+                    <label for="dividend">Dividend Yield (%):</label>
+                    <input type="number" id="dividend" step="0.01" value="0">
+                </div>
+            </div>
+        </div>
+
+        <div id="strangle-overview" style="margin-bottom: 10px; color: #444; font-size: 14px;"></div>
+        <button id="calculate">Calculate</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" id="setup-name" placeholder="Setup name" style="flex: 2;">
+            <button id="save-setup" style="flex: 1;">Save Setup</button>
+            <button id="delete-setup" style="flex: 1;">Delete Setup</button>
+            <select id="load-setup" style="flex: 2;"><option value="">Load Setup...</option></select>
+            <button id="reset-inputs" style="flex: 1;">Reset</button>
+        </div>
+
+        <div class="results-section">
+            <div id="results" class="results"></div>
+            <div id="wing-width" style="margin-top: 8px; color: #555; font-size: 13px;"></div>
+            <div id="chart"></div>
+        </div>
+    </div>
+    <!-- Load our script after Plotly -->
+    <script src="popup.js"></script>
+</body>
+</html> 
